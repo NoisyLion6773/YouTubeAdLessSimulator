@@ -91,7 +91,7 @@ else if (NavigationManager.Uri.Contains("/search") && string.IsNullOrEmpty(HtmlR
             startIndex = endIndex;
         }
 
-        // Return the modified links as HTML
+        return resultHtml;
     }
 
     private async Task HandleKeyDown(KeyboardEventArgs e) // Handle key down events
