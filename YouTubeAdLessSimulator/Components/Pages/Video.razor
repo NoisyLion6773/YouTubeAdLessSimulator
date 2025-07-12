@@ -1,0 +1,10 @@
+﻿@page "/video"
+
+<video controls="controls">
+  <source src="m.youtube.com/{videoId}" />
+</video>
+
+@code {
+    [SupplyParameterFromQuery(Name = "q")]
+    public string videoId { get; set; }
+}
