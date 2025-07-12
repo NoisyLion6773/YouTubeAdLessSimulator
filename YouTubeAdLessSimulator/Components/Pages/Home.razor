@@ -1,0 +1,18 @@
+﻿@page "/"
+@page "/search"
+
+@using YouTubeAdLessSimulator.Components.Ctl
+
+<PageTitle>Home</PageTitle>
+
+<YouTubeSearch CssClass="form-control input-lg" placeholder="YouTube Search" />
+<br />
+<br />
+<br />
+<DownloadVideo placeholder="Download a YouTube-Video by Link" />
+
+
+@code {
+    [SupplyParameterFromQuery(Name = "q")]
+    public string Query { get; set; }
+}

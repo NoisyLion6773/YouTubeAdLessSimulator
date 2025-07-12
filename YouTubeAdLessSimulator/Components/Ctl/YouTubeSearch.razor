@@ -1,0 +1,71 @@
+﻿@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<input class="@CssClass" @bind="SearchTerm" @onkeydown="HandleKeyDown" placeholder="@placeholder" />
+
+@if (!string.IsNullOrEmpty(HtmlResult))
+{
+    if (!string.IsNullOrEmpty(SearchTerm)||!string.IsNullOrWhiteSpace(SearchTerm))
+    {
+        NavigationManager.NavigateTo($"/search?q={Uri.EscapeDataString(SearchTerm)}");
+        <h3>HTML Code der Suche:</h3>
+        <pre>@HtmlResult</pre>
+    }
+    else
+    {
+        NavigationManager.NavigateTo("/");
+    }
+}
+else if (HtmlResult == null)
+{
+
+}
+
+@code {
+    [Parameter]
+    public string CssClass { get; set; }
+
+    [Parameter]
+    public string placeholder { get; set; }
+
+    private string SearchTerm { get; set; }
+    private string HtmlResult { get; set; } = "";
+
+    private async Task SearchAsync()
+    {
+        if (string.IsNullOrWhiteSpace(SearchTerm))
+            return;
+
+        var url = $"https://youtube.com/search?q={Uri.EscapeDataString(SearchTerm)}";
+
+        try
+        {
+            var response = await Http.GetAsync(url);
+            if (response.IsSuccessStatusCode)
+            {
+                HtmlResult = await response.Content.ReadAsStringAsync();
+
+                // Wenn du willst, dass die Seite navigiert, nachdem du Erfolg hast:
+                var encodedQuery = Uri.EscapeDataString(SearchTerm);
+                NavigationManager.NavigateTo($"/search?q={encodedQuery}");
+            }
+            else
+            {
+                HtmlResult = "Fehler beim Laden: " + response.StatusCode;
+            }
+        }
+        catch (Exception ex)
+        {
+            HtmlResult = "Oha, Error: " + ex.Message;
+        }
+        StateHasChanged();
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await SearchAsync();
+        }
+    }
+}
