@@ -2,12 +2,17 @@
 @page "/search"
 
 @using YouTubeAdLessSimulator.Components.Ctl
+@inject NavigationManager NavigationManager
 
 <PageTitle>Home</PageTitle>
 
-<YouTubeSearch CssClass="form-control input-lg" placeholder="YouTube Search" />
+<YouTubeSearch SearchTerm="@Query" CssClass="form-control input-lg" placeholder="YouTube Search" />
 <br />
-<LaunchVideo placeholder="Download a YouTube-Video by Link" />
+
+@if (string.IsNullOrEmpty(Query) || string.IsNullOrWhiteSpace(Query))
+{
+    <LaunchVideo placeholder="Launch a YouTube-Video by Link" />
+}
 
 
 @code {

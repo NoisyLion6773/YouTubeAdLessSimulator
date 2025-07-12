@@ -1,63 +1,28 @@
-﻿@inject HttpClient Http
+﻿@inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
 
-<input class="@CssClass" @bind="SearchTerm" @onkeydown="HandleKeyDown" placeholder="@placeholder" />
-
-@if (!string.IsNullOrEmpty(HtmlResult))
-{
-    if (!string.IsNullOrEmpty(SearchTerm) || !string.IsNullOrWhiteSpace(SearchTerm))
-    {
-        NavigationManager.NavigateTo($"/search?q={Uri.EscapeDataString(SearchTerm)}");
-        <h3>HTML Code der Suche:</h3>
-        <pre>@HtmlResult</pre>
-    }
-    else
-    {
-        NavigationManager.NavigateTo("/");
-    }
-}
-else if (HtmlResult == null)
-{
-
-}
-
+<div class="input-group">
+    <input @ref="InputRef"
+           class="@CssClass"
+           @bind="VideoId"
+           @onkeydown="HandleKeyDown"
+           placeholder="@placeholder" />
+    <button class="btn btn-outline-light" @onclick="LaunchAsync">↩️</button>
+</div>
 @code {
+    private ElementReference InputRef; // Declare the reference here
+
     [Parameter]
     public string CssClass { get; set; } = "form-control input-lg";
 
     [Parameter]
     public string placeholder { get; set; }
 
-    private string SearchTerm { get; set; }
-    private string HtmlResult { get; set; } = "";
+    public string VideoId { get; set; }
 
-    private async Task SearchAsync()
+    private async Task LaunchAsync()
     {
-        if (string.IsNullOrWhiteSpace(SearchTerm))
-            return;
-
-        var url = $"https://youtube.com/search?q={Uri.EscapeDataString(SearchTerm)}";
-
-        try
-        {
-            var response = await Http.GetAsync(url);
-            if (response.IsSuccessStatusCode)
-            {
-                HtmlResult = await response.Content.ReadAsStringAsync();
-
-                // Wenn du willst, dass die Seite navigiert, nachdem du Erfolg hast:
-                var encodedQuery = Uri.EscapeDataString(SearchTerm);
-                NavigationManager.NavigateTo($"/search?q={encodedQuery}");
-            }
-            else
-            {
-                HtmlResult = "Fehler beim Laden: " + response.StatusCode;
-            }
-        }
-        catch (Exception ex)
-        {
-            HtmlResult = "Oha, Error: " + ex.Message;
-        }
+        NavigationManager.NavigateTo($"/video?q={VideoId}");
         StateHasChanged();
     }
 
@@ -65,7 +30,8 @@ else if (HtmlResult == null)
     {
         if (e.Key == "Enter")
         {
-            await SearchAsync();
+            await JSRuntime.InvokeVoidAsync("blurElement", InputRef);
+            await LaunchAsync();
         }
     }
 }

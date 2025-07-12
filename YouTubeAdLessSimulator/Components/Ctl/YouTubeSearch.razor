@@ -1,24 +1,22 @@
-﻿@inject HttpClient Http
-@inject NavigationManager NavigationManager
+﻿@inject NavigationManager NavigationManager
+@inject HttpClient HttpClient
 
-<input class="@CssClass" @bind="SearchTerm" @onkeydown="HandleKeyDown" placeholder="@placeholder" />
+<div class="input-group">
+    <input class="@CssClass"
+           @bind="SearchTerm"
+           @onkeydown="HandleKeyDown"
+           placeholder="@placeholder" />
+    <button class="btn btn-outline-light" @onclick="SearchAsync">🔎</button> <!-- Einfach nur SearchAsync aufrufen! -->
+</div>
 
-@if (!string.IsNullOrEmpty(HtmlResult))
+@if (!string.IsNullOrEmpty(HtmlResultContent))
 {
-    if (!string.IsNullOrEmpty(SearchTerm)||!string.IsNullOrWhiteSpace(SearchTerm))
-    {
-        NavigationManager.NavigateTo($"/search?q={Uri.EscapeDataString(SearchTerm)}");
-        <h3>HTML Code der Suche:</h3>
-        <pre>@HtmlResult</pre>
-    }
-    else
-    {
-        NavigationManager.NavigateTo("/");
-    }
+    @HtmlResult
 }
-else if (HtmlResult == null)
+else if (NavigationManager.Uri.Contains("/search") && string.IsNullOrEmpty(HtmlResultContent))
 {
-
+    <br />
+    <div>Unfortunately, I have to tell you that this search is not valid</div>
 }
 
 @code {
@@ -28,37 +26,47 @@ else if (HtmlResult == null)
     [Parameter]
     public string placeholder { get; set; }
 
-    private string SearchTerm { get; set; }
-    private string HtmlResult { get; set; } = "";
+    [Parameter]
+    public string SearchTerm { get; set; }
 
-    private async Task SearchAsync()
+    private string HtmlResultContent { get; set; } // zum Halten des HTML Inhalts
+    private MarkupString HtmlResult => new MarkupString(HtmlResultContent ?? "");
+
+    private async Task SearchAsync() // Asynchrone Suche
     {
-        if (string.IsNullOrWhiteSpace(SearchTerm))
+        if (string.IsNullOrWhiteSpace(SearchTerm)) // Überprüfe, ob der Suchbegriff leer ist
             return;
 
-        var url = $"https://youtube.com/search?q={Uri.EscapeDataString(SearchTerm)}";
+        var url = $"https://youtube.com/search?q={Uri.EscapeDataString(SearchTerm)}"; // Erstelle die URL 🌐
 
         try
         {
-            var response = await Http.GetAsync(url);
+            var response = await HttpClient.GetAsync(url); // Sende Anfrage
             if (response.IsSuccessStatusCode)
             {
-                HtmlResult = await response.Content.ReadAsStringAsync();
+                var htmlContent = await response.Content.ReadAsStringAsync(); // Hol den HTML-Inhalt
 
-                // Wenn du willst, dass die Seite navigiert, nachdem du Erfolg hast:
+                // Links anpassen
+                var modifiedHtml = htmlContent.Replace("href=\"watch\"", "href=\"video\"")
+                                              .Replace("href=\"shorts\"", "href=\"video?q\"");
+
+                // Setze den HTML Content
+                HtmlResultContent = modifiedHtml;
+
+                // Navigiere nach erfolgreicher Suche
                 var encodedQuery = Uri.EscapeDataString(SearchTerm);
-                NavigationManager.NavigateTo($"/search?q={encodedQuery}");
+                NavigationManager.NavigateTo($"/search?q={encodedQuery}"); // Navigieren 🔍➡️
             }
             else
             {
-                HtmlResult = "Fehler beim Laden: " + response.StatusCode;
+                HtmlResultContent = $"<div>Loading ERROR: {response.StatusCode}</div>";
             }
         }
         catch (Exception ex)
         {
-            HtmlResult = "Oha, Error: " + ex.Message;
+            HtmlResultContent = $"<div>ERROR: {ex.Message}</div>"; // Fehlerbehandlung 🔴
         }
-        StateHasChanged();
+        StateHasChanged(); // Aktualisiere den Zustand! 🔄
     }
 
     private async Task HandleKeyDown(KeyboardEventArgs e)

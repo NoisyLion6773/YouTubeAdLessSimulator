@@ -1,8 +1,13 @@
 ﻿@page "/video"
 
-<video controls="controls">
-  <source src="m.youtube.com/{videoId}" />
-</video>
+@if (!string.IsNullOrEmpty(videoId))
+{
+    <iframe width="560" height="315" src="@($"https://www.youtube.com/embed/{videoId}")" frameborder="0" allowfullscreen></iframe>
+}
+else
+{
+    <p>No video selected.</p>
+}
 
 @code {
     [SupplyParameterFromQuery(Name = "q")]
