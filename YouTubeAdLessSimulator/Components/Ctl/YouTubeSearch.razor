@@ -27,7 +27,7 @@ else if (NavigationManager.Uri.Contains("/search") && string.IsNullOrEmpty(HtmlR
     public string placeholder { get; set; }
 
     [Parameter]
-    public string SearchTerm { get; set; } = string.Empty; // Initialize to avoid null binding
+    public string? SearchTerm { get; set; } = string.Empty; // Initialize to avoid null binding
 
     private string HtmlResultContent { get; set; } // Variable to hold HTML content
     private MarkupString HtmlResult => new MarkupString(HtmlResultContent ?? "");
