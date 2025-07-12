@@ -1,15 +1,23 @@
-﻿@page "/video"
+﻿@page "/shorts/{videoId}" 
+@page "/watch"
 
 @if (!string.IsNullOrEmpty(videoId))
-{
-    <iframe width="560" height="315" src="@($"https://www.youtube.com/embed/{videoId}")" frameborder="0" allowfullscreen></iframe>
+{ 
+    // Create a direct link to the YouTube video
+    var videoUrl = $"https://www.youtube.com/watch?v={videoId}";
+
+    <div>
+        <h2>Watch Video</h2>
+        <p>Click below to watch the video:</p>
+        <a href="@videoUrl" target="_blank" class="btn btn-primary">Open Video in YouTube</a>
+    </div>
 }
 else
 {
-    <p>No video selected.</p>
+    <p>No video selected.</p> 
 }
 
 @code {
-    [SupplyParameterFromQuery(Name = "q")]
+    [SupplyParameterFromQuery(Name = "v")]
     public string videoId { get; set; }
 }

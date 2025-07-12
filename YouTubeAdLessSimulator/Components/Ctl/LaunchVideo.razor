@@ -1,37 +1,38 @@
-﻿@inject IJSRuntime JSRuntime
-@inject NavigationManager NavigationManager
+﻿@inject IJSRuntime JSRuntime 
+@inject NavigationManager NavigationManager 
 
 <div class="input-group">
-    <input @ref="InputRef"
-           class="@CssClass"
-           @bind="VideoId"
-           @onkeydown="HandleKeyDown"
+    <input @ref="InputRef" 
+           class="@CssClass" 
+           @bind="Link" 
+           @onkeydown="HandleKeyDown" 
            placeholder="@placeholder" />
     <button class="btn btn-outline-light" @onclick="LaunchAsync">↩️</button>
 </div>
+
 @code {
-    private ElementReference InputRef; // Declare the reference here
+    private ElementReference InputRef; // Referenz auf das Input-Feld! 🆗 
 
     [Parameter]
-    public string CssClass { get; set; } = "form-control input-lg";
+    public string CssClass { get; set; } = "form-control input-lg"; // CSS-Klasse für das Input-Feld 🎨
 
     [Parameter]
-    public string placeholder { get; set; }
+    public string placeholder { get; set; } // Platzhalter-Text im Input ✍️
 
-    public string VideoId { get; set; }
+    public string Link { get; set; } // Link/ID für das Video 📺🎥
 
-    private async Task LaunchAsync()
+    private async Task LaunchAsync() // Methode zum Navigieren auf die Video-Seite! 🚀
     {
-        NavigationManager.NavigateTo($"/video?q={VideoId}");
-        StateHasChanged();
+        NavigationManager.NavigateTo($"/watch?v={Link.Substring(Link.Length - 11)}");
+        StateHasChanged(); // Aktualisiere den Status, falls nötig! 🔄
     }
 
-    private async Task HandleKeyDown(KeyboardEventArgs e)
+    private async Task HandleKeyDown(KeyboardEventArgs e) // Handle die Tasteneingabe! ⌨️
     {
-        if (e.Key == "Enter")
+        if (e.Key == "Enter") // Wenn die Enter-Taste gedrückt wird! 🎉
         {
-            await JSRuntime.InvokeVoidAsync("blurElement", InputRef);
-            await LaunchAsync();
+            await JSRuntime.InvokeVoidAsync("blurElement", InputRef); // Input-Feld verliert den Fokus! ✨
+            await LaunchAsync(); // Führe die Launch-Methode aus! 🔥
         }
     }
 }

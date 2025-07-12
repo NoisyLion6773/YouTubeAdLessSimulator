@@ -6,7 +6,7 @@
            @bind="SearchTerm"
            @onkeydown="HandleKeyDown"
            placeholder="@placeholder" />
-    <button class="btn btn-outline-light" @onclick="SearchAsync">🔎</button> <!-- Einfach nur SearchAsync aufrufen! -->
+    <button class="btn btn-outline-light" @onclick="SearchAsync">🔎</button>
 </div>
 
 @if (!string.IsNullOrEmpty(HtmlResultContent))
@@ -27,35 +27,35 @@ else if (NavigationManager.Uri.Contains("/search") && string.IsNullOrEmpty(HtmlR
     public string placeholder { get; set; }
 
     [Parameter]
-    public string SearchTerm { get; set; }
+    public string SearchTerm { get; set; } = string.Empty; // Initialize to avoid null binding
 
-    private string HtmlResultContent { get; set; } // zum Halten des HTML Inhalts
+    private string HtmlResultContent { get; set; } // Variable to hold HTML content
     private MarkupString HtmlResult => new MarkupString(HtmlResultContent ?? "");
 
-    private async Task SearchAsync() // Asynchrone Suche
+    private async Task SearchAsync() // Asynchronous search method
     {
-        if (string.IsNullOrWhiteSpace(SearchTerm)) // Überprüfe, ob der Suchbegriff leer ist
+        if (string.IsNullOrWhiteSpace(SearchTerm)) // Check if the search term is empty
             return;
 
-        var url = $"https://youtube.com/search?q={Uri.EscapeDataString(SearchTerm)}"; // Erstelle die URL 🌐
+        var url = $"https://youtube.com/results?search_query={Uri.EscapeDataString(SearchTerm)}"; // Create the URL
 
         try
         {
-            var response = await HttpClient.GetAsync(url); // Sende Anfrage
+            var response = await HttpClient.GetAsync(url); // Send request
             if (response.IsSuccessStatusCode)
             {
-                var htmlContent = await response.Content.ReadAsStringAsync(); // Hol den HTML-Inhalt
+                var htmlContent = await response.Content.ReadAsStringAsync(); // Get the HTML content
 
-                // Links anpassen
-                var modifiedHtml = htmlContent.Replace("href=\"watch\"", "href=\"video\"")
-                                              .Replace("href=\"shorts\"", "href=\"video?q\"");
+                // Extract video and shorts results
+                var videoResults = ExtractResults(htmlContent, "watch"); // Extract links to videos
+                var shortResults = ExtractResults(htmlContent, "shorts"); // Extract links to shorts
 
-                // Setze den HTML Content
-                HtmlResultContent = modifiedHtml;
+                // Combine results
+                HtmlResultContent = $"{videoResults}{shortResults}";
 
-                // Navigiere nach erfolgreicher Suche
+                // Navigate after successful search
                 var encodedQuery = Uri.EscapeDataString(SearchTerm);
-                NavigationManager.NavigateTo($"/search?q={encodedQuery}"); // Navigieren 🔍➡️
+                NavigationManager.NavigateTo($"/search?q={encodedQuery}"); // Navigate 🔍➡️
             }
             else
             {
@@ -64,16 +64,41 @@ else if (NavigationManager.Uri.Contains("/search") && string.IsNullOrEmpty(HtmlR
         }
         catch (Exception ex)
         {
-            HtmlResultContent = $"<div>ERROR: {ex.Message}</div>"; // Fehlerbehandlung 🔴
+            HtmlResultContent = $"<div>ERROR: {ex.Message}</div>"; // Error handling 🔴
         }
-        StateHasChanged(); // Aktualisiere den Zustand! 🔄
+        StateHasChanged(); // Update the state! 🔄
     }
 
-    private async Task HandleKeyDown(KeyboardEventArgs e)
+    private string ExtractResults(string htmlContent, string path)
+    {
+        // Simple parsing - in a production scenario, use a proper HTML parser
+        var resultHtml = "";
+
+        // Find the relevant sections based on the path (video or shorts)
+        // This won't actually work without proper parsing, consider using libraries like HtmlAgilityPack
+        var startTag = $"<a href=\"/{path}\""; // Adjust this for actual extraction logic
+        var endTag = "</a>";
+
+        int startIndex = 0;
+        while ((startIndex = htmlContent.IndexOf(startTag, startIndex)) >= 0)
+        {
+            int endIndex = htmlContent.IndexOf(endTag, startIndex) + endTag.Length;
+            if (endIndex > startIndex)
+            {
+                string resultSnippet = htmlContent.Substring(startIndex, endIndex - startIndex);
+                resultHtml += resultSnippet; // Add found snippet to resultHtml
+            }
+            startIndex = endIndex;
+        }
+
+        // Return the modified links as HTML
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e) // Handle key down events
     {
         if (e.Key == "Enter")
         {
-            await SearchAsync();
+            await SearchAsync(); // Trigger search on Enter key
         }
     }
 }
