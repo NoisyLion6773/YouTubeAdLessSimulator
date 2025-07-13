@@ -3,7 +3,7 @@
 @inject HttpClient HttpClient
 @inject IJSRuntime JSRuntime
 
-<div class="input-group-text">
+<div class="input-group-text" >
     <input @ref="InputRef"
            class="@InputClass"
            @bind="SearchTerm"
@@ -11,7 +11,6 @@
            placeholder="@InputPlaceholder"
            type="@InputType"
            aria-label="@InputAriaLabel" />
-    &nbsp;@*That's just space key*@&nbsp;
     <button type="@ButtonType"
             class="@ButtonClass"
             @onclick="SearchAsync">
@@ -95,26 +94,51 @@ else if (NavigationManager.Uri.Contains("/results") && string.IsNullOrEmpty(Html
         StateHasChanged(); // Update the state! 🔄
     }
 
-    private string ExtractResults(string htmlContent) // gets <ytd-thumbnail {ytdthumbnailcontent}</ytd-thumbnail>
+    private string ExtractResults(string htmlContent)
     {
-        // Check if htmlContent is null or empty, return empty string if so
         if (string.IsNullOrEmpty(htmlContent))
+            return string.Empty;
+
+        var regex = new Regex(@"<a\s+[^>]*href\s*=\s*""([^""]+)""[^>]*>(.*?)<\/a>", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+
+        var matches = regex.Matches(htmlContent);
+
+        var htmlParts = new List<string>();
+
+        foreach (Match m in matches)
         {
-            return string.Empty; // Rückgabe eines leeren Strings, Bro! 🌬️
+            var href = m.Groups[1].Value;
+            var linkText = m.Groups[2].Value;
+
+            if (!(href.StartsWith("/watch?v=") || href.StartsWith("/shorts/")))
+                continue;
+
+            string videoId = "";
+
+            if (href.StartsWith("/watch?v="))
+            {
+                // Extrahiere VideoId nach "/watch?v="
+                videoId = href.Substring("/watch?v=".Length);
+            }
+            else if (href.StartsWith("/shorts/"))
+            {
+                // Extrahiere VideoId nach "/shorts/"
+                videoId = href.Substring("/shorts/".Length);
+            }
+
+            // Vorschaubild-URL
+            string imgSrc = $"https://img.youtube.com/vi/{videoId}/hqdefault.jpg";
+
+            string htmlBlock = $@"
+            <div style=""margin-bottom:15px;"">
+                <img src=""{imgSrc}"" alt=""Thumbnail"" style=""max-width:200px; display:block; margin-bottom:5px;"" />
+                <a href=""{href}"">{linkText}</a>
+            </div>";
+
+            htmlParts.Add(htmlBlock.Trim());
         }
 
-        // Suche nach dem Thumbnail-Tag im HTML-Content
-        int startIndex = htmlContent.IndexOf("<ytd-thumbnail"); int endIndex = htmlContent.IndexOf("</ytd-thumbnail>", startIndex);
-
-        // Wenn beide Indizes gefunden werden, extrahiere den gewünschten Inhalt
-        if (startIndex != -1 && endIndex != -1)
-        {
-            // +15 für die Länge von <ytd-thumbnail und -1, um den Tag zu schneiden
-            return htmlContent.Substring(startIndex, endIndex - startIndex + "</ytd-thumbnail>".Length);
-        }
-
-        // Wenn kein Tag gefunden wurde, dann gib einen leeren String zurück, Bro
-        return string.Empty; // Immer chillig bleiben! 😉✌️
+        return string.Join("\n", htmlParts);
     }
     private async Task HandleKeyDown(KeyboardEventArgs e) // Handle key down events
     {

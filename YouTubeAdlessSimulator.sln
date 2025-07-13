@@ -5,6 +5,8 @@ VisualStudioVersion = 17.14.36301.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YouTubeAdLessSimulator", "YouTubeAdLessSimulator\YouTubeAdLessSimulator.csproj", "{F85A697B-8BE1-45EC-9774-A5979E047AF7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YTSimulatorFinal", "YTSimulatorFinal\YTSimulatorFinal.csproj", "{8BF042DA-E9D3-4525-9A5B-2517FAD5247B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{F85A697B-8BE1-45EC-9774-A5979E047AF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F85A697B-8BE1-45EC-9774-A5979E047AF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F85A697B-8BE1-45EC-9774-A5979E047AF7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BF042DA-E9D3-4525-9A5B-2517FAD5247B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BF042DA-E9D3-4525-9A5B-2517FAD5247B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BF042DA-E9D3-4525-9A5B-2517FAD5247B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BF042DA-E9D3-4525-9A5B-2517FAD5247B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -7,11 +7,16 @@
 {
     var url = $"https://www.youtube.com/watch?v={videoId}";
 
+
     // Sicherstellen, dass die URL immer richtig ist, falls es Shorts oder andere Formate gibt!
     url = url.Replace(NavigationManager.BaseUri, "www.youtube.com"); // Hier kann man weitere Ersetzungen machen, wenn nötig
 
     <div>
         <h2>Watch Video</h2>
+        <br />
+        <iframe src="@($"https://www.youtube.com/embed/{videoId}")" />
+        <br />
+        <br />
         <a href="@url" target="_blank" class="btn btn-primary">Open Video in YouTube</a>
     </div>
 }

@@ -1,28 +1,54 @@
 ﻿@inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
 
-<div class="input-group">
+<div class="input-group-text">
     <input @ref="InputRef"
-           class="@CssClass"
+           class="@InputClass"
+           type="@InputType"
+           aria-label="@InputAriaLabel"
            @bind="Link"
            @onkeydown="HandleKeyDown"
-           placeholder="@placeholder" />
-    <button class="btn btn-outline-light" @onclick="LaunchAsync">↩️</button>
+           placeholder="@InputPlaceholder" />
+    &nbsp;@*That's just space key*@&nbsp;
+    <button class="@ButtonClass"
+            type="@ButtonType"
+            @onclick="LaunchAsync">
+        @ButtonContent
+    </button>
 </div>
 
 @code {
     private ElementReference InputRef; // Referenz auf das Input-Feld! 🆗
 
     [Parameter]
-    public string CssClass { get; set; } = "form-control input-lg"; // CSS-Klasse für das Input-Feld 🎨
+    public string InputClass { get; set; } = "form-control input-lg"; // CSS-Klasse für das Input-Feld 🎨
 
     [Parameter]
-    public string placeholder { get; set; } // Platzhalter-Text im Input ✍️
+    public string ButtonClass { get; set; }
+
+    [Parameter]
+    public string ButtonContent { get; set; }
+
+    [Parameter]
+    public string InputType { get; set; }
+
+    [Parameter]
+    public string ButtonType { get; set; }
+
+    [Parameter]
+    public string InputAriaLabel { get; set; }
+
+    [Parameter]
+    public string InputPlaceholder { get; set; } // Platzhalter-Text im Input ✍️
 
     public string Link { get; set; } // Link/ID für das Video 📺🎥
 
     private async Task LaunchAsync() // Methode zum Navigieren auf die Video-Seite! 🚀
     {
+        if (string.IsNullOrEmpty(Link) && string.IsNullOrWhiteSpace(Link))
+        {
+            return;
+        }
         List<string> parts = Link.Split('/').ToList();
         if (Link.Contains("http"))
         {

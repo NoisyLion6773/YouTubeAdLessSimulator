@@ -1,0 +1,30 @@
+﻿@using YTSimulatorFinal.Components.Ctl
+<nav class="navbar navbar-expand-lg bg-dark border-bottom border-body" data-bs-theme="dark">
+    <div class="container-fluid">
+        <NavLink class="navbar-brand" href="/">YTLauncherAdFree</NavLink>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button><div class="collapse navbar-collapse" id="navbarColor01">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <div class="nav-item">
+                    <NavLink class="nav-item" aria-current="page" href="/" /> Home
+                </div>
+                <div class="nav-item">
+                    <NavLink class="nav-link nav-underline" href="/overview">Overview</NavLink>
+                </div>
+                <NavLink class="nav-item"></NavLink>
+                <NavLink class="nav-item"><a class="nav-link" href="/">About</a></NavLink>
+            </ul>
+            <form class="d-flex" role="search">
+                <YouTubeSearch InputClass="form-control me-2"
+                               ButtonClass="btn btn-outline-light"
+                               InputType="search"
+                               ButtonType="submit"
+                               InputPlaceholder="Search"
+                               InputAriaLabel="Search"
+                               ButtonContent="Search" />
+            </form>
+        </div>
+    </div>
+</nav>
+

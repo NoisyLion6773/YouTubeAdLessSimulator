@@ -6,12 +6,12 @@
 
 <PageTitle>Home</PageTitle>
 
-<YouTubeSearch SearchTerm="@Query" CssClass="form-control input-lg" placeholder="YouTube Search" />
+<YouTubeSearch ButtonContent="Search" SearchTerm="@Query" ButtonClass="btn btn-outline-success" InputClass="form-control input-lg" InputPlaceholder="YouTube Search" />
 <br />
 
 @if (string.IsNullOrEmpty(Query) || string.IsNullOrWhiteSpace(Query))
 {
-    <LaunchVideo placeholder="Launch a YouTube-Video by Link" />
+    <LaunchVideo ButtonContent="Launch" ButtonClass="btn btn-outline-danger" InputClass="form-control input-lg" InputPlaceholder="Launch a YouTube-Video by Link" />
 }
 
 
