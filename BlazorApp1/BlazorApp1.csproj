@@ -6,13 +6,4 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
-  <ItemGroup>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="SkyExtensions">
-      <HintPath>..\..\SkyExtensions\bin\Debug\net9.0\SkyExtensions.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>

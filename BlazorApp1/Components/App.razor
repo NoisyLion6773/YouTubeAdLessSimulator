@@ -1,0 +1,61 @@
+﻿@page "/results"
+@using Microsoft.AspNetCore.WebUtilities
+@using System.Linq;
+@inject NavigationManager NavigationManager
+
+<h1>Suchergebnisse für: <strong>@searchQuery</strong></h1>
+
+@if (string.IsNullOrEmpty(searchQuery))
+{
+    <p>Keine Suchanfrage gefunden.</p>
+}
+else
+{
+    <p>Hier sind einige Ergebnisse:</p>
+    <ul>
+        @foreach (var result in GetSampleResults())
+        {
+            <li>
+                <a href="/watch?v=@result" target="_blank">Video: @result</a><br />
+                <a href="/shorts/@result" target="_blank">Short: @result</a>
+            </li>
+        }
+    </ul>
+}
+
+@code {
+    private string searchQuery;
+
+    protected override void OnInitialized()
+    {
+        // Hole die Suchanfrage von der URL
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("search_query", out var queryValue))
+        {
+            searchQuery = queryValue;
+        }
+    }
+
+    // Diese Methode generiert einige feste Ergebnisse
+    private string[] GetSampleResults()
+    {
+        // Beispielhafte festgelegte IDs (11 zufällige Zeichen)
+        return new[]
+        {
+            GenerateRandomString(11),
+            GenerateRandomString(11),
+            GenerateRandomString(11),
+            GenerateRandomString(11),
+            GenerateRandomString(11),
+        };
+    }
+
+    // Methode zur Generierung einer zufälligen Buchstabenkombination
+    private string GenerateRandomString(int length)
+    {
+        const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        Random random = new Random();
+        return new string(Enumerable.Repeat(chars, length)
+          .Select(s => s[random.Next(s.Length)]).ToArray());
+    }
+}
