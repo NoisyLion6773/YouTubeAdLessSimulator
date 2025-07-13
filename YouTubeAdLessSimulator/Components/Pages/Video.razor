@@ -1,9 +1,15 @@
 ﻿@page "/shorts/{videoId}"
 @page "/watch"
 
+@inject NavigationManager NavigationManager
+
 @if (!string.IsNullOrEmpty(videoId))
 {
     var url = $"https://www.youtube.com/watch?v={videoId}";
+
+    // Sicherstellen, dass die URL immer richtig ist, falls es Shorts oder andere Formate gibt!
+    url = url.Replace(NavigationManager.BaseUri, "www.youtube.com"); // Hier kann man weitere Ersetzungen machen, wenn nötig
+
     <div>
         <h2>Watch Video</h2>
         <a href="@url" target="_blank" class="btn btn-primary">Open Video in YouTube</a>
@@ -11,7 +17,7 @@
 }
 else
 {
-    <p>No video selected.</p>
+    <p>No video selected. 📽️😢</p>
 }
 
 @code {
@@ -23,10 +29,9 @@ else
 
     protected override void OnParametersSet()
     {
-        // Wenn videoId aus der Route null ist, versuche v aus Query
         if (string.IsNullOrEmpty(videoId) && !string.IsNullOrEmpty(v))
         {
-            videoId = v;
+            videoId = v; // Cool, dass du die Möglichkeit nutzt, sich die Parameter zu holen! 🤓💡
         }
     }
 }

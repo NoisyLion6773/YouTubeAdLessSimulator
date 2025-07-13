@@ -1,29 +1,45 @@
-﻿@inject IJSRuntime JSRuntime 
-@inject NavigationManager NavigationManager 
+﻿@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
 
 <div class="input-group">
-    <input @ref="InputRef" 
-           class="@CssClass" 
-           @bind="Link" 
-           @onkeydown="HandleKeyDown" 
+    <input @ref="InputRef"
+           class="@CssClass"
+           @bind="Link"
+           @onkeydown="HandleKeyDown"
            placeholder="@placeholder" />
     <button class="btn btn-outline-light" @onclick="LaunchAsync">↩️</button>
 </div>
 
 @code {
-    private ElementReference InputRef; // Referenz auf das Input-Feld! 🆗 
+    private ElementReference InputRef; // Referenz auf das Input-Feld! 🆗
 
     [Parameter]
     public string CssClass { get; set; } = "form-control input-lg"; // CSS-Klasse für das Input-Feld 🎨
 
     [Parameter]
     public string placeholder { get; set; } // Platzhalter-Text im Input ✍️
-    
+
     public string Link { get; set; } // Link/ID für das Video 📺🎥
 
     private async Task LaunchAsync() // Methode zum Navigieren auf die Video-Seite! 🚀
     {
-        NavigationManager.NavigateTo($"/watch?v={Link.Substring(Link.Length - 11)}");
+        List<string> parts = Link.Split('/').ToList();
+        if (Link.Contains("http"))
+        {
+            parts.RemoveRange(0, 2);
+        }
+        else
+        {
+
+        }
+        parts.RemoveRange(0, 1);
+        Link = string.Empty;
+        foreach (var item in parts)
+        {
+            Link += "/";
+            Link += item;
+        }
+        NavigationManager.NavigateTo($"{Link}");
         StateHasChanged(); // Aktualisiere den Status, falls nötig! 🔄
     }
 

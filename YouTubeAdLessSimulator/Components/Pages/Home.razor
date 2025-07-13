@@ -1,5 +1,5 @@
 ﻿@page "/"
-@page "/search"
+@page "/results"
 
 @using YouTubeAdLessSimulator.Components.Ctl
 @inject NavigationManager NavigationManager
@@ -16,6 +16,6 @@
 
 
 @code {
-    [SupplyParameterFromQuery(Name = "q")]
+    [SupplyParameterFromQuery(Name = "search_query")]
     public string Query { get; set; }
 }
