@@ -1,8 +1,11 @@
-﻿@inject NavigationManager NavigationManager
+﻿@using System.Text.RegularExpressions
+@inject NavigationManager NavigationManager
 @inject HttpClient HttpClient
+@inject IJSRuntime JSRuntime
 
 <div class="input-group">
-    <input class="@CssClass"
+    <input @ref="InputRef"
+           class="@CssClass"
            @bind="SearchTerm"
            @onkeydown="HandleKeyDown"
            placeholder="@placeholder" />
@@ -31,13 +34,14 @@ else if (NavigationManager.Uri.Contains("/results") && string.IsNullOrEmpty(Html
 
     private string HtmlResultContent { get; set; } // Variable to hold HTML content
     private MarkupString HtmlResult => new MarkupString(HtmlResultContent ?? "");
+    ElementReference InputRef;
 
     private async Task SearchAsync() // Asynchronous search method
     {
         if (string.IsNullOrWhiteSpace(SearchTerm)) // Check if the search term is empty
             return;
 
-        var url = $"https://youtube.com/results?search_query={Uri.EscapeDataString(SearchTerm)}"; // Create the URL
+        var url = $"https://www.youtube.com/results?search_query={Uri.EscapeDataString(SearchTerm)}"; // Create the URL
 
         try
         {
@@ -47,11 +51,11 @@ else if (NavigationManager.Uri.Contains("/results") && string.IsNullOrEmpty(Html
                 var htmlContent = await response.Content.ReadAsStringAsync(); // Get the HTML content
 
                 // Extract video and shorts results
-                var videoResults = ExtractResults(htmlContent, "watch"); // Extract links to videos
-                var shortResults = ExtractResults(htmlContent, "shorts"); // Extract links to shorts
+                var results = ExtractResults(htmlContent); // Extract links to videos
+                // var shortResults = ExtractResults(htmlContent, "shorts"); // Extract links to shorts
 
                 // Combine results
-                HtmlResultContent = $"{videoResults}{shortResults}";
+                HtmlResultContent = $"{results}";
 
                 // Navigate after successful search
                 var encodedQuery = Uri.EscapeDataString(SearchTerm);
@@ -69,36 +73,64 @@ else if (NavigationManager.Uri.Contains("/results") && string.IsNullOrEmpty(Html
         StateHasChanged(); // Update the state! 🔄
     }
 
-    private string ExtractResults(string htmlContent, string path)
+    private string ExtractResults(string htmlContent)
     {
-        // Simple parsing - in a production scenario, use a proper HTML parser
-        var resultHtml = "";
+        if (string.IsNullOrEmpty(htmlContent))
+            return string.Empty;
 
-        // Find the relevant sections based on the path (video or shorts)
-        // This won't actually work without proper parsing, consider using libraries like HtmlAgilityPack
-        var startTag = $"<a href=\"/{path}\""; // Adjust this for actual extraction logic
-        var endTag = "</a>";
+        var regex = new Regex(@"<a\s+[^>]*href\s*=\s*""([^""]+)""[^>]*>(.*?)<\/a>", RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
-        int startIndex = 0;
-        while ((startIndex = htmlContent.IndexOf(startTag, startIndex)) >= 0)
+        var matches = regex.Matches(htmlContent);
+
+        var htmlParts = new List<string>();
+
+        foreach (Match m in matches)
         {
-            int endIndex = htmlContent.IndexOf(endTag, startIndex) + endTag.Length;
-            if (endIndex > startIndex)
+            var href = m.Groups[1].Value;
+            var linkText = m.Groups[2].Value;
+
+            if (!(href.StartsWith("/watch?v=") || href.StartsWith("/shorts/")))
+                continue;
+
+            string videoId = "";
+
+            if (href.StartsWith("/watch?v="))
             {
-                string resultSnippet = htmlContent.Substring(startIndex, endIndex - startIndex);
-                resultHtml += resultSnippet; // Add found snippet to resultHtml
+                // Extrahiere VideoId nach "/watch?v="
+                videoId = href.Substring("/watch?v=".Length);
             }
-            startIndex = endIndex;
+            else if (href.StartsWith("/shorts/"))
+            {
+                // Extrahiere VideoId nach "/shorts/"
+                videoId = href.Substring("/shorts/".Length);
+            }
+
+            // Vorschaubild-URL
+            string imgSrc = $"https://img.youtube.com/vi/{videoId}/hqdefault.jpg";
+
+            string htmlBlock = $@"
+            <div style=""margin-bottom:15px;"">
+                <img src=""{imgSrc}"" alt=""Thumbnail"" style=""max-width:200px; display:block; margin-bottom:5px;"" />
+                <a href=""{href}"">{linkText}</a>
+            </div>";
+
+            htmlParts.Add(htmlBlock.Trim());
         }
 
-        return resultHtml;
+        return string.Join("\n", htmlParts);
     }
-
     private async Task HandleKeyDown(KeyboardEventArgs e) // Handle key down events
     {
         if (e.Key == "Enter")
         {
+            await JSRuntime.InvokeVoidAsync("blurElement", InputRef);
             await SearchAsync(); // Trigger search on Enter key
         }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await SearchAsync();
+        await base.OnParametersSetAsync();
     }
 }
