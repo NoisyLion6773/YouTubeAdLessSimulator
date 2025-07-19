@@ -2,12 +2,14 @@
 <html lang="en">
 
 <script>
-    window.blurElement = (element) =>
-    {
-        if (element) {
-            element.blur();
+    function simulateTab(inputId) {
+        var inputElement = document.getElementById(inputId);
+
+        if (inputElement) {
+            inputElement.blur(); // Verliert den Fokus
+            console.log("Tabulator simuliert für Input mit ID: " + inputId);
         }
-    };
+    }
 </script>
 
 <head>

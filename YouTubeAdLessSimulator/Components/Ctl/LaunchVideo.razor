@@ -17,7 +17,9 @@
     </button>
 </div>
 
+
 @code {
+
     private ElementReference InputRef; // Referenz auf das Input-Feld! 🆗
 
     [Parameter]
@@ -45,7 +47,7 @@
 
     private async Task LaunchAsync() // Methode zum Navigieren auf die Video-Seite! 🚀
     {
-        if (string.IsNullOrEmpty(Link) && string.IsNullOrWhiteSpace(Link))
+        if (string.IsNullOrEmpty(Link) || string.IsNullOrWhiteSpace(Link))
         {
             return;
         }
@@ -59,13 +61,13 @@
 
         }
         parts.RemoveRange(0, 1);
-        Link = string.Empty;
+        string newLink = "";
         foreach (var item in parts)
         {
-            Link += "/";
-            Link += item;
+            newLink += "/";
+            newLink += item;
         }
-        NavigationManager.NavigateTo($"{Link}");
+        NavigationManager.NavigateTo($"{newLink}");
         StateHasChanged(); // Aktualisiere den Status, falls nötig! 🔄
     }
 
@@ -73,8 +75,11 @@
     {
         if (e.Key == "Enter") // Wenn die Enter-Taste gedrückt wird! 🎉
         {
-            await JSRuntime.InvokeVoidAsync("blurElement", InputRef); // Input-Feld verliert den Fokus! ✨
-            await LaunchAsync(); // Führe die Launch-Methode aus! 🔥
+            // Ruft die JavaScript-Funktion auf, um den Tabulator zu simulieren! 🔥
+            await JSRuntime.InvokeVoidAsync("simulateTab", InputRef.Id);
+
+            // Hier kannst du den LaunchAsync-Call behalten, wenn du das möchtest!
+            await LaunchAsync(); // Führe die Launch-Methode aus! 🚀
         }
     }
 }
