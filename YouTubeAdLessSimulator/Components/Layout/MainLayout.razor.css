@@ -8,8 +8,16 @@ main {
     flex: 1;
 }
 
-.sidebar {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+.fullscreen-media {
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+}
+
+.fit-to-screen {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .top-row {

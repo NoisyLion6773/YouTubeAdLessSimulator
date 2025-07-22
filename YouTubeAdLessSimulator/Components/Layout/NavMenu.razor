@@ -1,13 +1,16 @@
 ﻿<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">YouTubeAdLessSimulator</a>
+        <a class="navbar-brand" href="">
+            <img src="favicon.png" alt="YouTube adless Simulator" width="24" height="24" />
+            YaS
+        </a>
     </div>
 </div>
 
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
+<div class="collapse navbar-collapse" id="navbarNav" onclick="document.querySelector('.navbar-toggler').click()" >
+    <nav class="navbar bg-body-tertiary">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
@@ -27,4 +30,3 @@
         </div>
     </nav>
 </div>
-

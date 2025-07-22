@@ -1,133 +1,153 @@
 ﻿@using System.Text.RegularExpressions
+@using Microsoft.Playwright
 @inject NavigationManager NavigationManager
 @inject HttpClient HttpClient
-@inject IJSRuntime JSRuntime
+
+<link rel="stylesheet" href="https://www.youtube.com/s/_/ytmainappweb/_/ss/k=ytmainappweb.kevlar_base.7mlO37Iy1J8.L.B1.O/am=AAAQMCY/d=0/br=1/rs=AGKMywFPCBab2WDSIAmnnsRHoTHdMo3Q0A" />
 
 <div class="input-group-text">
     <input @ref="InputRef"
            class="@InputClass"
-           @bind="SearchTerm"
+           @bind="_localSearchTerm"
            @onkeydown="HandleKeyDown"
            placeholder="@InputPlaceholder"
            type="@InputType"
            aria-label="@InputAriaLabel" />
-    &nbsp;@*That's just space key*@&nbsp;
+    &nbsp;@*That's just a space key*@&nbsp;
     <button type="@ButtonType"
             class="@ButtonClass"
-            @onclick="SearchAsync">
+            @onclick="@(async () => await SearchAsync())">
         @ButtonContent
     </button>
 </div>
-
-@if (!string.IsNullOrEmpty(HtmlResultContent))
+@if (!string.IsNullOrEmpty(HtmlResultContent) && !string.IsNullOrWhiteSpace(HtmlResultContent))
 {
-    @HtmlResult
+    <div style="height: 0.5em">
+        @HtmlResult
+    </div>
 }
-else if (NavigationManager.Uri.Contains("/results") && string.IsNullOrEmpty(HtmlResultContent))
+else if (NavigationManager.Uri.Contains("/results"))
 {
-    <br />
-    <div>Unfortunately, I have to tell you that this search is not valid</div>
+    <div style="height: 0.5em">
+        <div>Unfortunately, I have to tell you that this search is not valid</div>
+    </div>
 }
 
 @code {
-    [Parameter]
-    public string ButtonContent { get; set; }
+    [Parameter] public string ButtonContent { get; set; } = "Search";
+    [Parameter] public string InputClass { get; set; } = "form-control input-lg";
+    [Parameter] public string ButtonClass { get; set; } = "btn btn-outline-light";
+    [Parameter] public string InputType { get; set; } = "text";
+    [Parameter] public string ButtonType { get; set; } = "button";
+    [Parameter] public string InputAriaLabel { get; set; } = "";
+    [Parameter] public string InputPlaceholder { get; set; } = "";
+    [Parameter] public string SearchTerm { get => _localSearchTerm; set => _localSearchTerm = value; }
 
-    [Parameter]
-    public string InputClass { get; set; } = "form-control input-lg";
-
-    [Parameter]
-    public string ButtonClass { get; set; } = "btn btn-outline-light";
-
-    [Parameter]
-    public string InputType { get; set; }
-
-    [Parameter]
-    public string ButtonType { get; set; }
-
-    [Parameter]
-    public string InputAriaLabel { get; set; }
-
-    [Parameter]
-    public string InputPlaceholder { get; set; }
-
-    [Parameter]
-    public string? SearchTerm { get; set; } = string.Empty; // Initialize to avoid null binding
-
-    private string HtmlResultContent { get; set; } // Variable to hold HTML content
+    private string _localSearchTerm;
+    private string HtmlResultContent { get; set; }
     private MarkupString HtmlResult => new MarkupString(HtmlResultContent ?? "");
-    ElementReference InputRef;
+    private ElementReference InputRef;
 
-    private async Task SearchAsync() // Asynchronous search method
+    private async Task SearchAsync()
     {
-        if (string.IsNullOrWhiteSpace(SearchTerm)) // Check if the search term is empty
+        if (string.IsNullOrWhiteSpace(_localSearchTerm))
             return;
 
-        var url = $"https://www.youtube.com/results?search_query={Uri.EscapeDataString(SearchTerm)}"; // Create the URL
+        await ProcessingSearch();
+
+        Thread.Sleep(2000);
+
+        await HtmlStringer("Hello, World", "999, 999, 999");
 
         try
         {
-            var response = await HttpClient.GetAsync(url); // Send request
-            if (response.IsSuccessStatusCode)
-            {
-                var htmlContent = await response.Content.ReadAsStringAsync(); // Get the HTML content
-
-                // Extract video and shorts results
-                var results = ExtractResults(htmlContent); // Extract links to videos
-                // var shortResults = ExtractResults(htmlContent, "shorts"); // Extract links to shorts
-
-                // Combine results
-                HtmlResultContent = $"{results}";
-
-                // Navigate after successful search
-                var encodedQuery = Uri.EscapeDataString(SearchTerm);
-                NavigationManager.NavigateTo($"/results?search_query={encodedQuery}"); // Navigate 🔍➡️
-            }
-            else
-            {
-                HtmlResultContent = $"<div>Loading ERROR: {response.StatusCode}</div>";
-            }
+            var htmlContent = await GetFullyRenderedHtml(_localSearchTerm);
+            HtmlResultContent = ExtractResults(htmlContent);
         }
         catch (Exception ex)
         {
-            HtmlResultContent = $"<div>ERROR: {ex.Message}</div>"; // Error handling 🔴
+            await HtmlStringer($"ERROR: {ex.Message}");
         }
-        StateHasChanged(); // Update the state! 🔄
-    }
 
-    private string ExtractResults(string htmlContent) // gets <ytd-thumbnail {ytdthumbnailcontent}</ytd-thumbnail>
+        StateHasChanged();
+    }
+    private bool _isProcessing = false;
+    private int _processingStep = 0;
+    async Task ProcessingSearch()
     {
-        // Check if htmlContent is null or empty, return empty string if so
-        if (string.IsNullOrEmpty(htmlContent))
+        _isProcessing = true;
+        _processingStep = 0;
+
+        while (_isProcessing)
         {
-            return string.Empty; // Rückgabe eines leeren Strings, Bro! 🌬️
+            var dots = new string('.', (_processingStep % 3) + 1);
+            string currentText = $"Processing{dots}";
+
+            await HtmlStringer(htmlText: currentText, rgb: "250, 000, 000");
+            StateHasChanged();
+
+            // Falls HtmlResultContent sich geändert hat, breche ab
+            if (HtmlResultContent != currentText)
+            {
+                break;
+            }
+
+            await Task.Delay(250);
+            _processingStep++;
         }
 
-        // Suche nach dem Thumbnail-Tag im HTML-Content
-        int startIndex = htmlContent.IndexOf("<ytd-thumbnail"); int endIndex = htmlContent.IndexOf("</ytd-thumbnail>", startIndex);
-
-        // Wenn beide Indizes gefunden werden, extrahiere den gewünschten Inhalt
-        if (startIndex != -1 && endIndex != -1)
-        {
-            // +15 für die Länge von <ytd-thumbnail und -1, um den Tag zu schneiden
-            return htmlContent.Substring(startIndex, endIndex - startIndex + "</ytd-thumbnail>".Length);
-        }
-
-        // Wenn kein Tag gefunden wurde, dann gib einen leeren String zurück, Bro
-        return string.Empty; // Immer chillig bleiben! 😉✌️
+        _isProcessing = false;
     }
-    private async Task HandleKeyDown(KeyboardEventArgs e) // Handle key down events
+    private string ExtractResults(string htmlContent)
+    {
+        if (string.IsNullOrEmpty(htmlContent))
+            return string.Empty;
+
+        var matches = System.Text.RegularExpressions.Regex.Matches(
+        htmlContent,
+        @"<ytd-thumbnail\b[^>]*>(.*?)</ytd-thumbnail>",
+        System.Text.RegularExpressions.RegexOptions.Singleline | System.Text.RegularExpressions.RegexOptions.IgnoreCase
+        );
+
+        var resultList = new List<string>();
+
+        foreach (System.Text.RegularExpressions.Match match in matches)
+        {
+            resultList.Add(match.Value.Trim());
+        }
+
+        return string.Join("\n", resultList);
+    }
+    public async Task<string> GetFullyRenderedHtml(string searchQuery)
+    {
+        using var playwright = await Playwright.CreateAsync();
+        var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+        {
+            Headless = true
+        });
+
+        var page = await browser.NewPageAsync();
+        await page.GotoAsync($"https://www.youtube.com/results?search_query={Uri.EscapeDataString(searchQuery)}");
+        var content = await page.ContentAsync();
+        await browser.CloseAsync();
+        return content;
+    }
+    private async Task HandleKeyDown(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
         {
-            await JSRuntime.InvokeVoidAsync("blurElement", InputRef);
-            await SearchAsync(); // Trigger search on Enter key
+            StateHasChanged();
+            await SearchAsync();
         }
     }
-
+    async Task HtmlStringer(string htmlText, string rgb = "0, 0, 0")
+    {
+        HtmlResultContent = $"<div style=\"color: rgb({rgb}); font-weight: light; font-size: 125%;\">{htmlText}</div>";
+        await Task.CompletedTask;
+    }
     protected override async Task OnParametersSetAsync()
     {
-        await SearchAsync();
+        await SearchAsync(); // This runs every time ANY parameter changes!
         await base.OnParametersSetAsync();
     }
 }

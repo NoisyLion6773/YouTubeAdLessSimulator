@@ -1,15 +1,14 @@
 ﻿@inherits LayoutComponentBase
+@inject IJSRuntime IJSRuntime
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <main>
-        <div class="top-row px-4">
+<div class="page" data-bs-theme="@(isDarkMode ? "dark" : "light")">
+    <main class="fit-to-screen">
+        <div class="top-row">
+            <div class="position-absolute start-0">
+                <NavMenu />
+            </div>
             <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
         </div>
-
         <article class="content px-4">
             @Body
         </article>
@@ -21,3 +20,19 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+
+
+@code {
+    private bool isDarkMode;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            isDarkMode = await IJSRuntime.InvokeAsync<bool>("getPreferredTheme");
+            StateHasChanged();
+        }
+    }
+
+}

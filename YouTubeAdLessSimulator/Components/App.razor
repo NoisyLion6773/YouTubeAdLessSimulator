@@ -1,17 +1,5 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
-
-<script>
-    function simulateTab(inputId) {
-        var inputElement = document.getElementById(inputId);
-
-        if (inputElement) {
-            inputElement.blur(); // Verliert den Fokus
-            console.log("Tabulator simuliert für Input mit ID: " + inputId);
-        }
-    }
-</script>
-
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -19,9 +7,12 @@
     <link rel="stylesheet" href="@Assets["lib/bootstrap/dist/css/bootstrap.min.css"]" />
     <link rel="stylesheet" href="@Assets["app.css"]" />
     <link rel="stylesheet" href="@Assets["YouTubeAdLessSimulator.styles.css"]" />
+    <link href="css/themes.min.css" rel="stylesheet" />
+    <script src="javascript/bootstrap-auto-theme.js"></script>
     <ImportMap />
     <link rel="icon" type="image/png" href="favicon.png" />
     <HeadOutlet @rendermode="InteractiveServer" />
+    <script src="/app.js"></script>
 </head>
 
 <body>
